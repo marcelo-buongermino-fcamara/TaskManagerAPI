@@ -1,4 +1,5 @@
-﻿using TaskManagerAPI.Domain.Enums;
+﻿using TaskManagerAPI.Domain.Entities;
+using TaskManagerAPI.Domain.Enums;
 
 namespace TaskManagerAPI.Application.DTOs;
 
@@ -10,15 +11,16 @@ public class ToDoItemRequest
     public Status Status { get; set; }
 }
 
-public record ToDoItemResponse(string Title, string? Description, DateTime? ExpiresIn, Status Status)
+public record ToDoItemResponse(Guid ID, string Title, string? Description, DateTime? ExpiresIn, string Status)
 { 
+    public Guid ID { get; } = ID;
     public string Title { get;} = Title;
     public string? Description { get;} = Description;
     public DateTime? ExpiresIn { get;} = ExpiresIn;
-    public Status Status { get;} = Status;
+    public string Status { get;} = Status;
 
-    public static ToDoItemResponse ToDTO(ToDoItemRequest entity)
+    public static ToDoItemResponse ToDTO(ToDoItem entity)
     {
-        return new ToDoItemResponse(entity.Title, entity.Description, entity.ExpiresIn, entity.Status);
+        return new ToDoItemResponse(entity.ID, entity.Title, entity.Description, entity.ExpiresIn, entity.Status.ToString());
     }
 }
