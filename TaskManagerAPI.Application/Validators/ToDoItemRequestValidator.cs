@@ -3,9 +3,9 @@ using TaskManagerAPI.Application.DTOs;
 
 namespace TaskManagerAPI.Application.Validators;
 
-public class TaskValidator : AbstractValidator<TaskRequest>
+public class ToDoItemRequestValidator : AbstractValidator<ToDoItemRequest>
 {
-    public TaskValidator()
+    public ToDoItemRequestValidator()
     {
         RuleFor(p => p.Title)
             .NotEmpty()
