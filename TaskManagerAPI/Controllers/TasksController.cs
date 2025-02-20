@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TaskManagerAPI.Application.DTOs;
 using TaskManagerAPI.Application.UseCases;
+using TaskManagerAPI.Domain.Enums;
 
 namespace TaskManagerAPI.API.Controllers;
 
@@ -10,9 +11,11 @@ public class TasksController : ControllerBase
 {
     //injetar logger e use case
     readonly ICreateTask _createTaskUseCase;
-    public TasksController(ICreateTask createTask)
+    readonly IListTasks _listTasksUseCase;
+    public TasksController(ICreateTask createTask, IListTasks listTasks)
     {
         _createTaskUseCase = createTask;
+        _listTasksUseCase = listTasks;
     }
 
 
@@ -22,5 +25,13 @@ public class TasksController : ControllerBase
         await _createTaskUseCase.ExecuteAsync(task);
 
         return Created("", task);
+    }
+
+    [HttpGet]
+    [Route("all")]
+    public async Task<IActionResult> GetAction(Status? status, DateTime? expiresIn)
+    {
+        var tasks = await _listTasksUseCase.ExecuteAsync(status, expiresIn);
+        return Ok(tasks);
     }
 }
