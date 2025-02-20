@@ -2,7 +2,7 @@
 
 namespace TaskManagerAPI.Domain.Entities;
 
-public class Task(String title, String? description, DateTime? expiresIn, Status status)
+public class ToDoItem(string title, string? description, DateTime? expiresIn, Status status)
 {
     public Guid ID { get; } = Guid.NewGuid();
     public string Title { get; private set; } = title;
