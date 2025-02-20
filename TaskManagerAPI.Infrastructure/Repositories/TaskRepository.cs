@@ -1,4 +1,5 @@
-﻿using TaskManagerAPI.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using TaskManagerAPI.Domain.Entities;
 using TaskManagerAPI.Domain.Enums;
 using TaskManagerAPI.Domain.Interfaces;
 
@@ -19,9 +20,17 @@ public class TaskRepository(ApiContext context) : ITaskRepository
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<ToDoItem>> GetAllAsync(Status? status, DateTime? expiresIn)
+    public async Task<List<ToDoItem>> GetAllAsync(Status? status, DateTime? expiresIn)
     {
-        throw new NotImplementedException();
+        var query = _context.ToDoItems.AsQueryable();
+
+        if (status.HasValue)
+            query = query.Where(p => p.Status == status.Value);
+
+        if (expiresIn.HasValue)
+            query = query.Where(p => p.ExpiresIn == expiresIn.Value);
+
+        return await query.ToListAsync();
     }
 
     public Task<ToDoItem> UpdateAsync(ToDoItem task)
