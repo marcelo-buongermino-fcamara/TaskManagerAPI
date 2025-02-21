@@ -1,17 +1,20 @@
-﻿using System.Runtime.CompilerServices;
-using TaskManagerAPI.Application.DTOs;
+﻿using TaskManagerAPI.Domain.Interfaces;
 
 namespace TaskManagerAPI.Application.UseCases;
 
 public interface IDeleteTask
 {
-    void ExecuteAsync(Guid id);
+    Task ExecuteAsync(Guid id);
 }
 
-public class DeleteTask : IDeleteTask
+public class DeleteTask(ITaskRepository repository) : IDeleteTask
 {
-    public void ExecuteAsync(Guid id)
-    {
+    readonly ITaskRepository _repository = repository;
 
+    public async Task ExecuteAsync(Guid id)
+    {
+        var item = await _repository.GetByIdAsync(id) ?? throw new Exception("Not Found");
+
+        await _repository.DeleteAsync(item);
     }
 }
