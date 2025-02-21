@@ -11,4 +11,13 @@ public class ToDoItem(string title, string? description, DateTime? expiresIn, St
     public Status Status { get; private set; } = status;
     public DateTime CreatedAt { get; } = DateTime.Now;
     public DateTime UpdatedAt { get; private set; } = DateTime.Now;
+
+    public void Update(string title, string? description, DateTime? expiresIn, Status status)
+    {
+        Title = title;
+        Description = description;
+        ExpiresIn = expiresIn;
+        Status = status;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
