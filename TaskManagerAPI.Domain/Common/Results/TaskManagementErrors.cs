@@ -9,5 +9,5 @@ public static class TaskManagementErrors
     }
 
     public static Error NotFound(Guid id) => new Error(
-        "Task.NotFound", $"The taks with Id '{id}' was not found");
+        "Task.NotFound", $"The task with Id '{id}' was not found");
 }
