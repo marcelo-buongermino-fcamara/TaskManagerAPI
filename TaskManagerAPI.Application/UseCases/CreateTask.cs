@@ -1,29 +1,29 @@
 ﻿using TaskManagerAPI.Application.DTOs;
 using TaskManagerAPI.Application.Validators;
+using TaskManagerAPI.Domain.Common.Results;
 using TaskManagerAPI.Domain.Entities;
 using TaskManagerAPI.Domain.Interfaces;
-using TaskManagerAPI.Infrastructure;
 
 namespace TaskManagerAPI.Application.UseCases;
 
 public interface ICreateTask
 {
-    Task ExecuteAsync(ToDoItemRequest toDoItem);
+    Task<Result<ToDoItemResponse>> ExecuteAsync(ToDoItemRequest toDoItem);
 }
 
 public class CreateTask(ITaskRepository repository) : ICreateTask
 {
-    readonly ITaskRepository _repository = repository;
+    private readonly ITaskRepository _repository = repository;
 
-    public Task ExecuteAsync(ToDoItemRequest toDoItem)
+    public async Task<Result<ToDoItemResponse>> ExecuteAsync(ToDoItemRequest toDoItem)
     {
         var validator = new ToDoItemRequestValidator();
         var validationResult = validator.Validate(toDoItem);
 
         if (!validationResult.IsValid)
         {
-            //Lançar erro com Status code 404
-            throw new Exception(validationResult.ToString());
+            return Result<ToDoItemResponse>.Failure(
+                TaskManagementErrors.ValidationError(validationResult.Errors.Select(e => e.ErrorMessage)));
         }
 
         var entity = new ToDoItem(
@@ -33,8 +33,10 @@ public class CreateTask(ITaskRepository repository) : ICreateTask
             toDoItem.Status
         );
 
-        _repository.CreateAsync(entity);
+        await _repository.CreateAsync(entity);
 
-        return Task.CompletedTask;
+        var response = ToDoItemResponse.ToDTO(entity);
+
+        return Result<ToDoItemResponse>.Success(response);
     }
 }

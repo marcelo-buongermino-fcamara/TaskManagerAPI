@@ -1,31 +1,34 @@
 ﻿using TaskManagerAPI.Application.DTOs;
 using TaskManagerAPI.Application.Validators;
-using TaskManagerAPI.Domain.Entities;
+using TaskManagerAPI.Domain.Common.Results;
 using TaskManagerAPI.Domain.Interfaces;
 
 namespace TaskManagerAPI.Application.UseCases;
 
 public interface IUpdateTask
 {
-    Task ExecuteAsync(ToDoItemRequest updateRequest, Guid id);
+    Task<Result> ExecuteAsync(ToDoItemRequest updateRequest, Guid id);
 }
 
 public class UpdateTask(ITaskRepository repository) : IUpdateTask
 {
-    readonly ITaskRepository _repository = repository;
+    private readonly ITaskRepository _repository = repository;
 
-    public async Task ExecuteAsync(ToDoItemRequest updateRequest, Guid id)
+    public async Task<Result> ExecuteAsync(ToDoItemRequest updateRequest, Guid id)
     {
         var validator = new ToDoItemRequestValidator();
         var validationResult = validator.Validate(updateRequest);
 
         if (!validationResult.IsValid)
         {
-            //Lançar erro com Status code 400
-            throw new Exception(validationResult.ToString());
+            return Result.Failure(
+                TaskManagementErrors.ValidationError(validationResult.Errors.Select(e => e.ErrorMessage)));            
         }
 
-        var result = await _repository.GetByIdAsync(id) ?? throw new Exception("Task not found"); //lançar 404
+        var result = await _repository.GetByIdAsync(id);
+
+        if (result is null)
+            return Result.Failure(TaskManagementErrors.NotFound(id));
 
         result.Update(
               updateRequest.Title,
@@ -35,5 +38,7 @@ public class UpdateTask(ITaskRepository repository) : IUpdateTask
         );
 
         await _repository.UpdateAsync(result);
+
+        return Result.Success();
     }
 }

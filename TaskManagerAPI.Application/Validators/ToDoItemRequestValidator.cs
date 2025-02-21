@@ -18,8 +18,8 @@ public class ToDoItemRequestValidator : AbstractValidator<ToDoItemRequest>
             .WithMessage("Description must have a maximum of 200 characters");
     
         RuleFor(p => p.ExpiresIn)
-            .GreaterThan(DateTime.Now)
-            .WithMessage("ExpiresIn must be greater than the current date");
+            .GreaterThanOrEqualTo(DateTime.UtcNow)
+            .WithMessage("ExpiresIn must be greater or equal than the current date");
 
         RuleFor(x => x.Status).IsInEnum()
             .WithMessage("Invalid status");

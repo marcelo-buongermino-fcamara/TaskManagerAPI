@@ -1,4 +1,5 @@
 ﻿using TaskManagerAPI.Application.DTOs;
+using TaskManagerAPI.Domain.Common.Results;
 using TaskManagerAPI.Domain.Enums;
 using TaskManagerAPI.Domain.Interfaces;
 
@@ -6,14 +7,14 @@ namespace TaskManagerAPI.Application.UseCases;
 
 public interface IListTasks
 {
-    Task<List<ToDoItemResponse>> ExecuteAsync(Status? status, DateTime? expiresIn);
+    Task<Result<List<ToDoItemResponse>>> ExecuteAsync(Status? status, DateTime? expiresIn);
 }
 
 public class ListTasks(ITaskRepository repository) : IListTasks
 {
-    readonly ITaskRepository _repository = repository;
+    private readonly ITaskRepository _repository = repository;
 
-    async Task<List<ToDoItemResponse>> IListTasks.ExecuteAsync(Status? status, DateTime? expiresIn)
+    async Task<Result<List<ToDoItemResponse>>> IListTasks.ExecuteAsync(Status? status, DateTime? expiresIn)
     {
         var toDoItems = await _repository.GetAllAsync(status, expiresIn);
         var itemsDTO = new List<ToDoItemResponse>();
@@ -23,6 +24,6 @@ public class ListTasks(ITaskRepository repository) : IListTasks
             itemsDTO.Add(ToDoItemResponse.ToDTO(toDoItem));
         }
 
-        return itemsDTO;
-    }  
+        return Result<List<ToDoItemResponse>>.Success(itemsDTO);
+    } 
 }
