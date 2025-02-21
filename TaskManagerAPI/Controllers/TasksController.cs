@@ -7,17 +7,16 @@ namespace TaskManagerAPI.API.Controllers;
 
 [Route("api/task")]
 [ApiController]
-public class TasksController : ControllerBase
+public class TasksController(ICreateTask createTask,
+                            IListTasks listTasks,
+                            IUpdateTask updateTask,
+                            IDeleteTask deleteTask) : ControllerBase
 {
     //injetar logger e use case
-    readonly ICreateTask _createTaskUseCase;
-    readonly IListTasks _listTasksUseCase;
-    public TasksController(ICreateTask createTask, IListTasks listTasks)
-    {
-        _createTaskUseCase = createTask;
-        _listTasksUseCase = listTasks;
-    }
-
+    readonly ICreateTask _createTaskUseCase = createTask;
+    readonly IListTasks _listTasksUseCase = listTasks;
+    readonly IUpdateTask _updateTaskUseCase = updateTask;
+    readonly IDeleteTask _deleteTaskUseCase = deleteTask;
 
     [HttpPost]
     public async Task<IActionResult> CreateTask(ToDoItemRequest task)
@@ -33,5 +32,19 @@ public class TasksController : ControllerBase
     {
         var tasks = await _listTasksUseCase.ExecuteAsync(status, expiresIn);
         return Ok(tasks);
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> UpdateTask(ToDoItemRequest task, Guid id)
+    {
+        await _updateTaskUseCase.ExecuteAsync(task, id);
+        return Ok();
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> DeleteTask(Guid id)
+    {
+        await _deleteTaskUseCase.ExecuteAsync(id);
+        return NoContent();
     }
 }
