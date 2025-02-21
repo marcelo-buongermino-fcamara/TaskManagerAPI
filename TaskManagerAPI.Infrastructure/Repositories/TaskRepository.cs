@@ -15,9 +15,11 @@ public class TaskRepository(ApiContext context) : ITaskRepository
         await _context.SaveChangesAsync();
     }
 
-    public Task<ToDoItem> DeleteAsync(Guid id)
+    public async Task DeleteAsync(ToDoItem item)
     {
-        throw new NotImplementedException();
+        _context.Remove(item);
+        await _context.SaveChangesAsync();
+        
     }
 
     public async Task<List<ToDoItem>> GetAllAsync(Status? status, DateTime? expiresIn)
@@ -33,9 +35,15 @@ public class TaskRepository(ApiContext context) : ITaskRepository
         return await query.ToListAsync();
     }
 
-    public Task<ToDoItem> UpdateAsync(ToDoItem task)
+    public async Task<ToDoItem?> GetByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        return await _context.ToDoItems.FindAsync(id);
+    }
+
+    public async Task UpdateAsync(ToDoItem task)
+    {
+        _context.Update(task);
+        await _context.SaveChangesAsync();
     }
 }   
     

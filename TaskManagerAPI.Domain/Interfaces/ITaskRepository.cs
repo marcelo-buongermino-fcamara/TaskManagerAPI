@@ -6,7 +6,8 @@ namespace TaskManagerAPI.Domain.Interfaces;
 public interface ITaskRepository
 {
     Task<List<ToDoItem>> GetAllAsync(Status? status, DateTime? expiresIn);
+    Task<ToDoItem?> GetByIdAsync(Guid id);
     Task CreateAsync(ToDoItem task);
-    Task<ToDoItem> UpdateAsync(ToDoItem task);
-    Task<ToDoItem> DeleteAsync(Guid id);
+    Task UpdateAsync(ToDoItem task);
+    Task DeleteAsync(ToDoItem task);
 }
