@@ -30,7 +30,7 @@ public class TaskRepository(ApiContext context) : ITaskRepository
             query = query.Where(p => p.Status == status.Value);
 
         if (expiresIn.HasValue)
-            query = query.Where(p => p.ExpiresIn == expiresIn.Value);
+            query = query.Where(p => p.ExpiresIn!.Value.Date == expiresIn.Value.Date);
 
         return await query.ToListAsync();
     }
