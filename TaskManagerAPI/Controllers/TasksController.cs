@@ -5,15 +5,19 @@ using TaskManagerAPI.Domain.Enums;
 
 namespace TaskManagerAPI.API.Controllers;
 
-[Route("api/task")]
 [ApiController]
+[Route("api/task")]
+[Produces("application/json")]
 public class TasksController(ICreateTask createTask,
                             IGetById getTaskById,
                             IListTasks listTasks,
                             IUpdateTask updateTask,
-                            IDeleteTask deleteTask) : ControllerBase
+                            IDeleteTask deleteTask,
+                            ILogger<TasksController> logger) : ControllerBase
 {
-    //injetar logger e use case
+    
+    private readonly ILogger<TasksController> _logger = logger;
+
     readonly ICreateTask _createTaskUseCase = createTask;
     readonly IListTasks _listTasksUseCase = listTasks;
     readonly IGetById _getTaskByIdUseCase = getTaskById;
@@ -25,13 +29,15 @@ public class TasksController(ICreateTask createTask,
     {
         var result = await _createTaskUseCase.ExecuteAsync(task);
 
-        if (result.IsFailure) 
+        if (result.IsFailure)
         {
+            _logger.LogError("Error creating task: {Error}", result.Error);
             return BadRequest(result.Error);
         }
 
         var created = result.Value;
 
+        _logger.LogInformation("Task with with ID {id} has been created", created.ID);
         return CreatedAtAction(nameof(GetById), new { id = result.Value.ID }, result.Value);
     }
 
@@ -39,8 +45,9 @@ public class TasksController(ICreateTask createTask,
     [Route("all")]
     public async Task<IActionResult> GetAction(Status? status, DateTime? expiresIn)
     {
-        var tasks = await _listTasksUseCase.ExecuteAsync(status, expiresIn);
-        return Ok(tasks);
+        var result = await _listTasksUseCase.ExecuteAsync(status, expiresIn);
+
+        return Ok(result.Value);
     }
 
     [HttpGet("{id}")]
@@ -50,6 +57,7 @@ public class TasksController(ICreateTask createTask,
 
         if (result.IsFailure)
         {
+            _logger.LogError("Error while finding task: {Error}", result.Error);
             return NotFound(result.Error);
         }
 
@@ -59,7 +67,10 @@ public class TasksController(ICreateTask createTask,
     [HttpPut]
     public async Task<IActionResult> UpdateTask(ToDoItemRequest task, Guid id)
     {
+        _logger.LogInformation("Updating task with with ID {id}", id);
         await _updateTaskUseCase.ExecuteAsync(task, id);
+
+        _logger.LogInformation("Task with with ID {id} has been updated", id);
         return Ok();
     }
 
@@ -67,6 +78,8 @@ public class TasksController(ICreateTask createTask,
     public async Task<IActionResult> DeleteTask(Guid id)
     {
         await _deleteTaskUseCase.ExecuteAsync(id);
+
+        _logger.LogInformation("Task with with ID: {id} has been deleted", id);
         return NoContent();
     }
 }
