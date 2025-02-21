@@ -8,6 +8,7 @@ namespace TaskManagerAPI.API.Controllers;
 [Route("api/task")]
 [ApiController]
 public class TasksController(ICreateTask createTask,
+                            IGetById getTaskById,
                             IListTasks listTasks,
                             IUpdateTask updateTask,
                             IDeleteTask deleteTask) : ControllerBase
@@ -15,15 +16,23 @@ public class TasksController(ICreateTask createTask,
     //injetar logger e use case
     readonly ICreateTask _createTaskUseCase = createTask;
     readonly IListTasks _listTasksUseCase = listTasks;
+    readonly IGetById _getTaskByIdUseCase = getTaskById;
     readonly IUpdateTask _updateTaskUseCase = updateTask;
     readonly IDeleteTask _deleteTaskUseCase = deleteTask;
 
     [HttpPost]
     public async Task<IActionResult> CreateTask(ToDoItemRequest task)
     {
-        await _createTaskUseCase.ExecuteAsync(task);
+        var result = await _createTaskUseCase.ExecuteAsync(task);
 
-        return Created("", task);
+        if (result.IsFailure) 
+        {
+            return BadRequest(result.Error);
+        }
+
+        var created = result.Value;
+
+        return CreatedAtAction(nameof(GetById), new { id = result.Value.ID }, result.Value);
     }
 
     [HttpGet]
@@ -32,6 +41,19 @@ public class TasksController(ICreateTask createTask,
     {
         var tasks = await _listTasksUseCase.ExecuteAsync(status, expiresIn);
         return Ok(tasks);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var result = await _getTaskByIdUseCase.ExecuteAsync(id);
+
+        if (result.IsFailure)
+        {
+            return NotFound(result.Error);
+        }
+
+        return Ok(result.Value);
     }
 
     [HttpPut]

@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddScoped<IUpdateTask, UpdateTask>();
         services.AddScoped<IDeleteTask, DeleteTask>();
         services.AddScoped<IListTasks, ListTasks>();
+        services.AddScoped<IGetById, GetById>();
 
         //Domain
         services.AddScoped<ITaskRepository, TaskRepository>();
